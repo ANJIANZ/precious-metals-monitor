@@ -111,13 +111,13 @@ function initChart() {
           borderColor: '#2a3a48', borderWidth: 1, padding: 12, displayColors: false,
           callbacks: {
             title: (items) => new Date(items[0].label).toLocaleString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }),
-            label: (item) => '¥' + Number(item.raw).toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' / 克',
+            label: (item) => '¥' + Number(item.raw * state.cnyRate).toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' / 克',
           },
         },
       },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.04)', display: false }, ticks: { color: '#5a6a7a', maxTicksLimit: 12, font: { size: 11 }, maxRotation: 45 } },
-        y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#5a6a7a', font: { size: 11 }, callback: (v) => '¥' + v.toLocaleString() + '/克' } },
+        y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#5a6a7a', font: { size: 11 }, callback: (v) => '¥' + (v * state.cnyRate).toLocaleString() + '/克' } },
       },
     },
   });
