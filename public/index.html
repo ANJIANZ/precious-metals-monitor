@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>贵金属实时监控</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- 顶部导航栏 -->
+  <header class="header">
+    <div class="header-left">
+      <h1>🏆 贵金属实时监控</h1>
+      <span class="subtitle">Precious Metals Live Monitor</span>
+    </div>
+    <div class="header-right">
+      <div class="status-indicator" id="statusIndicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">连接中...</span>
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="main-container">
+
+    <!-- 价格卡片区域 -->
+    <section class="cards-grid" id="priceCards">
+      <!-- 由 JavaScript 动态生成 -->
+    </section>
+
+    <!-- 图表和详情区域 -->
+    <section class="charts-section">
+      <div class="chart-container">
+        <div class="chart-header">
+          <h2>📈 价格走势图</h2>
+          <div class="chart-controls">
+            <select id="metalSelect" class="select-control">
+              <option value="XAU">黄金 (XAU)</option>
+              <option value="XAG">白银 (XAG)</option>
+              <option value="XPT">铂金 (XPT)</option>
+              <option value="XPD">钯金 (XPD)</option>
+            </select>
+            <select id="rangeSelect" class="select-control">
+              <option value="1">1天</option>
+              <option value="7">7天</option>
+              <option value="30">30天</option>
+              <option value="90">90天</option>
+              <option value="365" selected>1年</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 热门基金推荐 -->
+    <section class="funds-section">
+      <div class="section-header">
+        <h2>🔥 热门优势基金推荐</h2>
+        <div class="fund-controls">
+          <select id="fundSortSelect" class="select-control">
+            <option value="return1y">按近1年收益</option>
+            <option value="return3m">按近3月收益</option>
+            <option value="return1m">按近1月收益</option>
+            <option value="changePercent">按日涨幅</option>
+          </select>
+        </div>
+      </div>
+      <div class="funds-grid" id="fundsGrid">
+        <!-- 由 JavaScript 动态生成 -->
+      </div>
+    </section>
+
+    <!-- 数据表格 -->
+    <section class="table-section">
+      <h2>📊 详细行情</h2>
+      <div class="table-wrapper">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th>品种</th>
+              <th>最新价 (USD/克)</th>
+              <th>人民币 (CNY/克)</th>
+              <th>涨跌额</th>
+              <th>涨跌幅</th>
+              <th>最高价</th>
+              <th>最低价</th>
+              <th>更新时间</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- 由 JavaScript 生成 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 数据来源说明 -->
+    <section class="info-section">
+      <p>💡 数据来源: 实时数据来自 api.gold-api.com（免费公共接口），单位为人民币元/克。不可用时使用模拟数据展示。</p>
+      <p>⏰ 自动刷新间隔: <strong id="refreshIntervalDisplay">1</strong> 秒</p>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>贵金属实时监控系统 v1.0 | 数据仅供参考，不构成投资建议</p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

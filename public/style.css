@@ -1,0 +1,508 @@
+/* ============== CSS 变量 & 重置 ============== */
+:root {
+  --bg-primary: #0f1923;
+  --bg-card: #1a2c38;
+  --bg-card-hover: #1f3543;
+  --bg-chart: #1a2c38;
+  --text-primary: #e8f0f8;
+  --text-secondary: #8899aa;
+  --text-muted: #5a6a7a;
+  --accent-gold: #f0b90b;
+  --accent-silver: #c0c0c0;
+  --accent-platinum: #a8b8c8;
+  --accent-palladium: #b8a8c8;
+  --color-up: #00c853;
+  --color-down: #ff1744;
+  --color-up-bg: rgba(0, 200, 83, 0.12);
+  --color-down-bg: rgba(255, 23, 68, 0.12);
+  --border-color: #2a3a48;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --transition: 0.3s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ============== Header ============== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #0f1923 0%, #1a2c38 100%);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.header-left h1 {
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f0b90b, #f5d742);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-up);
+  box-shadow: 0 0 8px var(--color-up);
+  animation: pulse 2s infinite;
+}
+
+.status-dot.disconnected {
+  background: var(--color-down);
+  box-shadow: 0 0 8px var(--color-down);
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.clock {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+/* ============== 主容器 ============== */
+.main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+
+/* ============== 价格卡片 ============== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.price-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.price-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  border-radius: 0 4px 4px 0;
+}
+
+.price-card[data-metal="XAU"]::before { background: var(--accent-gold); }
+.price-card[data-metal="XAG"]::before { background: var(--accent-silver); }
+.price-card[data-metal="XPT"]::before { background: var(--accent-platinum); }
+.price-card[data-metal="XPD"]::before { background: var(--accent-palladium); }
+
+.price-card:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.price-card .metal-icon { font-size: 28px; margin-bottom: 8px; }
+.price-card .metal-name { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+.price-card .metal-symbol { font-size: 11px; color: var(--text-muted); }
+
+.price-card .current-price {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 8px 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-card .cny-price {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-card .price-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.price-change.up { background: var(--color-up-bg); color: var(--color-up); }
+.price-change.down { background: var(--color-down-bg); color: var(--color-down); }
+
+.price-card .card-details {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.card-details span { display: flex; flex-direction: column; }
+.card-details .label { color: var(--text-muted); font-size: 11px; }
+
+/* ============== 图表区域 ============== */
+.charts-section { margin-bottom: 24px; }
+
+.chart-container {
+  background: var(--bg-chart);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chart-header h2 { font-size: 18px; font-weight: 600; }
+
+.chart-controls { display: flex; gap: 10px; }
+
+.select-control {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238899aa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+.select-control:hover, .select-control:focus {
+  border-color: var(--accent-gold);
+  outline: none;
+}
+
+.select-control option { background: var(--bg-primary); }
+
+.chart-wrapper { position: relative; height: 380px; }
+
+/* ============== 基金推荐区域 ============== */
+.funds-section { margin-bottom: 24px; }
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.section-header h2 { font-size: 18px; font-weight: 600; }
+
+.funds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.fund-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.fund-card:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--accent-gold);
+}
+
+.fund-card.hot::after {
+  content: '🔥热门';
+  position: absolute;
+  top: 12px;
+  right: -28px;
+  background: linear-gradient(135deg, #ff6b35, #f0b90b);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 32px;
+  transform: rotate(35deg);
+}
+
+.fund-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.fund-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.fund-code {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.fund-type-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(240, 185, 11, 0.15);
+  color: var(--accent-gold);
+  border: 1px solid rgba(240, 185, 11, 0.3);
+  white-space: nowrap;
+}
+
+.fund-nav-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.fund-nav {
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.fund-nav-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.fund-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fund-rt-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(0, 200, 83, 0.15);
+  color: var(--color-up);
+  border: 1px solid rgba(0, 200, 83, 0.3);
+  margin-left: 6px;
+  vertical-align: middle;
+  font-weight: 500;
+}
+.fund-rt-badge.offline {
+  background: rgba(90, 106, 122, 0.15);
+  color: var(--text-muted);
+  border-color: rgba(90, 106, 122, 0.3);
+}
+
+.fund-gsz-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 6px 12px;
+  background: rgba(240, 185, 11, 0.06);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.fund-gsz { color: var(--accent-gold); }
+.fund-gsz strong { font-size: 15px; }
+.fund-gsz-time { color: var(--text-muted); margin-left: auto; }
+
+.fund-returns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+}
+
+.return-item { text-align: center; }
+.return-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.return-value { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.fund-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.fund-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+}
+
+.fund-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.fund-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.fund-meta span { display: flex; flex-direction: column; }
+.fund-meta .meta-label { font-size: 11px; color: var(--text-muted); }
+.fund-meta .meta-value { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+/* ============== 数据表格 ============== */
+.table-section { margin-bottom: 24px; }
+.table-section h2 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+
+.table-wrapper {
+  overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table thead { background: rgba(255,255,255,0.03); }
+
+.data-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.price-up { color: var(--color-up) !important; font-weight: 600; }
+.price-down { color: var(--color-down) !important; font-weight: 600; }
+
+/* ============== 信息区域 ============== */
+.info-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.info-section p { font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+
+/* ============== Footer ============== */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-size: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ============== 响应式 ============== */
+@media (max-width: 768px) {
+  .header { padding: 12px 16px; flex-direction: column; gap: 10px; }
+  .header-right { width: 100%; justify-content: space-between; }
+  .main-container { padding: 16px; }
+  .cards-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .price-card .current-price { font-size: 24px; }
+  .chart-header { flex-direction: column; align-items: flex-start; }
+  .chart-controls { width: 100%; }
+  .select-control { flex: 1; }
+  .chart-wrapper { height: 280px; }
+}
+
+@media (max-width: 480px) {
+  .cards-grid { grid-template-columns: 1fr 1fr; }
+  .price-card { padding: 14px; }
+  .price-card .current-price { font-size: 20px; }
+}
+

@@ -1,0 +1,4 @@
+﻿node_modules/
+server.log
+.env
+test-funds.json

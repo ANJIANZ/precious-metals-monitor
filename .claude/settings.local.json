@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Stop-Process *)",
+      "PowerShell(npm install *)",
+      "PowerShell(opencode *)",
+      "PowerShell(if \\(Test-Path \"$env:USERPROFILE\\\\.opencode\"\\) { Get-ChildItem \"$env:USERPROFILE\\\\.opencode\" -Recurse -Force | Select-Object FullName } else { \"不存在 .opencode 目录\" })",
+      "PowerShell(node C:\\\\Users\\\\17852\\\\precious-metals-monitor\\\\server.js)",
+      "WebSearch",
+      "WebFetch(domain:huggingface.co)",
+      "WebFetch(domain:render.com)",
+      "PowerShell(gh *)",
+      "PowerShell(winget *)"
+    ]
+  }
+}

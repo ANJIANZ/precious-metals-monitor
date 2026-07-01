@@ -1,0 +1,14 @@
+{
+  "name": "precious-metals-monitor",
+  "version": "1.0.0",
+  "description": "实时贵金属价格监控网站",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0"
+  }
+}
