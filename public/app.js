@@ -1,4 +1,4 @@
-// ============== 全局状态 ==============
+﻿// ============== 全局状态 ==============
 const state = {
   prices: {},
   chart: null,
@@ -95,7 +95,7 @@ function initChart() {
   state.chart = new Chart(ctx, {
     type: 'line',
     data: { labels: [], datasets: [{
-      label: '价格 (USD/克)', data: [],
+      label: '价格 (CNY/克)', data: [],
       borderColor: '#f0b90b', backgroundColor: 'rgba(240,185,11,0.08)',
       borderWidth: 2, fill: true, tension: 0.3,
       pointRadius: 0, pointHitRadius: 10, pointHoverRadius: 5,
@@ -111,13 +111,13 @@ function initChart() {
           borderColor: '#2a3a48', borderWidth: 1, padding: 12, displayColors: false,
           callbacks: {
             title: (items) => new Date(items[0].label).toLocaleString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }),
-            label: (item) => '¥' + Number(item.raw * state.cnyRate).toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' / 克',
+            label: (item) => '¥' + Number(item.raw).toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' / 克',
           },
         },
       },
       scales: {
         x: { grid: { color: 'rgba(255,255,255,0.04)', display: false }, ticks: { color: '#5a6a7a', maxTicksLimit: 12, font: { size: 11 }, maxRotation: 45 } },
-        y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#5a6a7a', font: { size: 11 }, callback: (v) => '¥' + (v * state.cnyRate).toLocaleString() + '/g' } },
+        y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#5a6a7a', font: { size: 11 }, callback: (v) => '¥' + v.toLocaleString() + '/克' } },
       },
     },
   });
