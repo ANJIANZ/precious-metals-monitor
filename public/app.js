@@ -55,19 +55,23 @@ function fmtTime(s) {
 function renderCards(data) {
   let html = '';
   for (const [key, m] of Object.entries(data)) {
-    const up = m.change >= 0;
+    const changePct = m.changePercent ?? 0;
+    const changeVal = m.change ?? 0;
+    const up = changeVal >= 0;
     const arrow = up ? '▲' : '▼';
     const sign = up ? '+' : '';
+    const highStr = m.high ? fmtPrice(m.high) : '--';
+    const lowStr = m.low ? fmtPrice(m.low) : '--';
     html += `<div class="price-card" data-metal="${key}">
       <div class="metal-icon">${state.metalIcons[key] || '🏅'}</div>
       <div class="metal-name">${m.name}</div>
       <div class="metal-symbol">${m.symbol}/${m.unit}</div>
       <div class="current-price">$${fmtPrice(m.price)}</div>
       <div class="cny-price">≈ ¥${fmtPrice(m.price * state.cnyRate)}</div>
-      <div class="price-change ${up ? 'up' : 'down'}">${arrow} ${sign}${(m.changePercent ?? 0).toFixed(2)}%</div>
+      <div class="price-change ${up ? 'up' : 'down'}">${arrow} ${sign}${changePct.toFixed(2)}%</div>
       <div class="card-details">
-        <span><span class="label">最高</span>$${fmtPrice(m.high)}</span>
-        <span><span class="label">最低</span>$${fmtPrice(m.low)}</span>
+        <span><span class="label">最高</span>$${highStr}</span>
+        <span><span class="label">最低</span>$${lowStr}</span>
         <span><span class="label">更新</span>${fmtTime(m.timestamp)}</span>
       </div>
     </div>`;
