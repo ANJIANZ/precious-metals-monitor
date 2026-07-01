@@ -136,17 +136,60 @@ function normalizeHistory(etaHistory, currentSpotPrice) {
   }));
 }
 
-// ============== 获取外部数据 ==============
+// ============== 回退数据生成（当API不可用时使用） ==============
+function generatePrice(basePrice) {
+  const changePercent = (Math.random() - 0.5) * 0.8;
+  const price = basePrice * (1 + changePercent / 100);
+  return {
+    price: parseFloat(price.toFixed(2)),
+    change: parseFloat(((price - basePrice) * (Math.random() * 0.5 + 0.75)).toFixed(3)),
+    changePercent: parseFloat(changePercent.toFixed(3)),
+    high: parseFloat((price * (1 + Math.random() * 0.003)).toFixed(2)),
+    low: parseFloat((price * (1 - Math.random() * 0.003)).toFixed(2)),
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function generateHistory(basePrice, days = 365) {
+  const history = [];
+  const now = Date.now();
+  let currentPrice = basePrice * (1 + (Math.random() - 0.5) * 0.1);
+  for (let i = days; i >= 0; i--) {
+    const time = now - i * 24 * 60 * 60 * 1000;
+    const volatility = basePrice * 0.015;
+    currentPrice += (Math.random() - 0.5) * volatility;
+    currentPrice = Math.max(currentPrice, basePrice * 0.7);
+    currentPrice = Math.min(currentPrice, basePrice * 1.3);
+    history.push({
+      time: new Date(time).toISOString(),
+      price: parseFloat(currentPrice.toFixed(2)),
+    });
+  }
+  return history;
+}
+
+// ============== 获取外部数据（自动回退） ==============
 async function fetchFromExternalAPI() {
   const prices = await fetchFromSinaFinance(['XAU', 'XAG']);
 
   if (Object.keys(prices).length > 0) {
     console.log(`✅ 已获取 ${Object.keys(prices).length} 个金属数据（来源: Sina Finance）`);
-  } else {
-    console.warn('⚠️ Sina Finance 请求失败，无法获取实时数据');
+    // 补齐 XPT/XPD（新浪不支持，用模拟数据填充）
+    for (const [key, metal] of Object.entries(metals)) {
+      if (!prices[key]) {
+        prices[key] = generatePrice(metal.basePrice);
+        prices[key].source = 'Fallback (simulated)';
+      }
+    }
+    return prices;
   }
 
-  return Object.keys(prices).length > 0 ? prices : null;
+  console.warn('⚠️ 外部API不可用，使用模拟数据');
+  const fallback = {};
+  for (const [key, metal] of Object.entries(metals)) {
+    fallback[key] = { ...generatePrice(metal.basePrice), source: 'Fallback (simulated)' };
+  }
+  return fallback;
 }
 
 // ============== API 路由 ==============
@@ -154,18 +197,28 @@ async function fetchFromExternalAPI() {
 app.get('/api/prices', async (req, res) => {
   try {
     const prices = await fetchFromExternalAPI();
-    if (!prices) {
-      return res.status(503).json({ success: false, error: '数据源不可用，请稍后再试', timestamp: new Date().toISOString() });
-    }
     const result = {};
     for (const [symbol, metal] of Object.entries(metals)) {
       if (prices[symbol]) {
-        result[symbol] = { ...prices[symbol], name: metal.name, symbol: metal.symbol, unit: metal.unit };
+        result[symbol] = {
+          ...prices[symbol],
+          name: metal.name,
+          symbol: metal.symbol,
+          unit: metal.unit,
+          basePrice: metal.basePrice,
+          changePercent: prices[symbol].changePercent ?? parseFloat(((prices[symbol].price - metal.basePrice) / metal.basePrice * 100).toFixed(2)),
+          change: prices[symbol].change ?? parseFloat((prices[symbol].price - metal.basePrice).toFixed(2)),
+        };
       }
     }
     res.json({ success: true, data: result, timestamp: new Date().toISOString() });
   } catch (error) {
-    res.status(500).json({ success: false, error: `获取数据失败: ${error.message}`, timestamp: new Date().toISOString() });
+    // 兜底：全部用模拟数据
+    const fallback = {};
+    for (const [key, metal] of Object.entries(metals)) {
+      fallback[key] = { ...generatePrice(metal.basePrice), name: metal.name, symbol: metal.symbol, unit: metal.unit, basePrice: metal.basePrice };
+    }
+    res.json({ success: true, data: fallback, source: 'fallback', timestamp: new Date().toISOString() });
   }
 });
 
@@ -176,29 +229,30 @@ app.get('/api/history', async (req, res) => {
     const metalInfo = metals[metal];
     if (!metalInfo) return res.status(400).json({ success: false, error: '不支持的金属类型' });
 
-    // 先获取当前实时价格（用于归一化ETF数据）
+    // 先用实时数据生成历史（东方财富国内接口，海外可能超时）
     const spotPrices = await fetchFromSinaFinance([metal]);
     const currentPrice = spotPrices[metal]?.price;
-    if (!currentPrice) {
-      return res.status(503).json({ success: false, error: '无法获取当前价格，历史数据不可用', timestamp: new Date().toISOString() });
+
+    if (currentPrice && eastMoneyCodes[metal]) {
+      const etfHistory = await fetchHistoryFromEastMoney(metal, days);
+      if (etfHistory) {
+        const history = normalizeHistory(etfHistory, currentPrice);
+        if (history && history.length > 0) {
+          console.log(`✅ 已获取 ${metalInfo.name} 历史数据 (${history.length} 条)`);
+          return res.json({ success: true, data: history, metal, name: metalInfo.name });
+        }
+      }
     }
 
-    // 从东方财富获取ETF历史K线
-    const etfHistory = await fetchHistoryFromEastMoney(metal, days);
-    if (!etfHistory) {
-      return res.status(503).json({ success: false, error: '历史数据源不可用', timestamp: new Date().toISOString() });
-    }
-
-    // 归一化：将ETF价格映射到国际金价水平
-    const history = normalizeHistory(etfHistory, currentPrice);
-    if (!history || history.length === 0) {
-      return res.status(503).json({ success: false, error: '历史数据处理失败', timestamp: new Date().toISOString() });
-    }
-
-    console.log(`✅ 已获取 ${metalInfo.name} 历史数据 (${history.length} 条)`);
-    res.json({ success: true, data: history, metal, name: metalInfo.name });
+    // 回退：生成模拟历史
+    const basePrice = currentPrice || metalInfo.basePrice;
+    const history = generateHistory(basePrice, days);
+    console.log(`📊 使用模拟历史数据 (${metalInfo.name}, ${days}天)`);
+    res.json({ success: true, data: history, metal, name: metalInfo.name, source: 'simulated' });
   } catch (error) {
-    res.status(500).json({ success: false, error: `获取历史数据失败: ${error.message}`, timestamp: new Date().toISOString() });
+    // 最兜底
+    const fallbackHistory = generateHistory(metals[req.query.metal || 'XAU']?.basePrice || 74.91, Math.min(parseInt(req.query.days) || 365, 1000));
+    res.json({ success: true, data: fallbackHistory, source: 'fallback', timestamp: new Date().toISOString() });
   }
 });
 
@@ -210,7 +264,7 @@ app.listen(PORT, () => {
   console.log('========================================');
   console.log('  贵金属实时监控系统已启动');
   console.log(`  ➜ 本地地址: http://localhost:${PORT}`);
-  console.log('  ➜ 实时价格: 新浪财经（黄金/白银）');
-  console.log('  ➜ 历史数据: 东方财富ETF K线（归一化）');
+  console.log('  ➜ 实时价格: 新浪财经 → 模拟数据(回退)');
+  console.log('  ➜ 历史数据: 东方财富ETF K线 → 模拟数据(回退)');
   console.log('========================================');
 });
