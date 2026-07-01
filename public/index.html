@@ -25,6 +25,9 @@
     </div>
   </header>
 
+  <!-- 错误提示区域 -->
+  <div id="errorBanner" class="error-banner" style="display:none;"></div>
+
   <!-- 主内容 -->
   <main class="main-container">
 
@@ -60,24 +63,6 @@
       </div>
     </section>
 
-    <!-- 热门基金推荐 -->
-    <section class="funds-section">
-      <div class="section-header">
-        <h2>🔥 热门优势基金推荐</h2>
-        <div class="fund-controls">
-          <select id="fundSortSelect" class="select-control">
-            <option value="return1y">按近1年收益</option>
-            <option value="return3m">按近3月收益</option>
-            <option value="return1m">按近1月收益</option>
-            <option value="changePercent">按日涨幅</option>
-          </select>
-        </div>
-      </div>
-      <div class="funds-grid" id="fundsGrid">
-        <!-- 由 JavaScript 动态生成 -->
-      </div>
-    </section>
-
     <!-- 数据表格 -->
     <section class="table-section">
       <h2>📊 详细行情</h2>
@@ -104,8 +89,8 @@
 
     <!-- 数据来源说明 -->
     <section class="info-section">
-      <p>💡 数据来源: 实时数据来自 api.gold-api.com（免费公共接口），单位为人民币元/克。不可用时使用模拟数据展示。</p>
-      <p>⏰ 自动刷新间隔: <strong id="refreshIntervalDisplay">1</strong> 秒</p>
+      <p>💡 数据来源: 新浪财经（黄金/白银）→ Yahoo Finance（全部金属），价格为美元/克，按实时汇率换算人民币。所有数据均为真实行情，不可用时将显示错误提示。</p>
+      <p>⏰ 自动刷新间隔: <strong id="refreshIntervalDisplay">5</strong> 秒</p>
     </section>
 
   </main>

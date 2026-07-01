@@ -19,8 +19,17 @@ const tableBody = $('tableBody');
 const metalSelect = $('metalSelect');
 const rangeSelect = $('rangeSelect');
 const refreshDisplay = $('refreshIntervalDisplay');
-const fundsGrid = $('fundsGrid');
-const fundSortSelect = $('fundSortSelect');
+const errorBanner = $('errorBanner');
+
+function setError(msg) {
+  if (!errorBanner) return;
+  if (msg) {
+    errorBanner.textContent = msg;
+    errorBanner.style.display = 'block';
+  } else {
+    errorBanner.style.display = 'none';
+  }
+}
 
 // ============== 工具函数 ==============
 function updateClock() {
@@ -55,7 +64,7 @@ function renderCards(data) {
       <div class="metal-symbol">${m.symbol}/${m.unit}</div>
       <div class="current-price">$${fmtPrice(m.price)}</div>
       <div class="cny-price">≈ ¥${fmtPrice(m.price * state.cnyRate)}</div>
-      <div class="price-change ${up ? 'up' : 'down'}">${arrow} ${sign}${m.changePercent.toFixed(2)}%</div>
+      <div class="price-change ${up ? 'up' : 'down'}">${arrow} ${sign}${(m.changePercent ?? 0).toFixed(2)}%</div>
       <div class="card-details">
         <span><span class="label">最高</span>$${fmtPrice(m.high)}</span>
         <span><span class="label">最低</span>$${fmtPrice(m.low)}</span>
@@ -79,7 +88,7 @@ function renderTable(data) {
       <td class="${cls}">$${fmtPrice(m.price)}</td>
       <td class="${cls}">¥${fmtPrice(m.price * state.cnyRate)}</td>
       <td class="${cls}">${arrow} ${sign}${fmtPrice(m.change)}</td>
-      <td class="${cls}">${sign}${m.changePercent.toFixed(2)}%</td>
+      <td class="${cls}">${sign}${(m.changePercent ?? 0).toFixed(2)}%</td>
       <td>$${fmtPrice(m.high)}</td>
       <td>$${fmtPrice(m.low)}</td>
       <td>${fmtTime(m.timestamp)}</td>
@@ -138,74 +147,16 @@ async function loadHistory(metal, days) {
   try {
     const r = await fetch(`/api/history?metal=${metal}&days=${days}`);
     const j = await r.json();
-    if (j.success) { state.chartData = j.data; updateChart(j.data, metal); }
-  } catch (e) { console.error('加载历史数据失败:', e); }
-}
-
-// ============== 基金推荐 ==============
-function renderFunds(funds) {
-  if (!funds || funds.length === 0) {
-    fundsGrid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">暂无基金数据</p>';
-    return;
+    if (j.success) {
+      state.chartData = j.data;
+      updateChart(j.data, metal);
+      setError('');
+    } else {
+      setError(`⚠️ ${j.error || '历史数据获取失败'}`);
+    }
+  } catch (e) {
+    setError('⚠️ 加载历史数据失败');
   }
-  let html = '';
-  for (const f of funds) {
-    const up = f.changePercent >= 0;
-    const arrow = up ? '▲' : '▼';
-    const sign = up ? '+' : '';
-    const changeCls = up ? 'up' : 'down';
-    const ret1mCls = f.return1m >= 0 ? 'price-up' : 'price-down';
-    const ret3mCls = f.return3m >= 0 ? 'price-up' : 'price-down';
-    const ret1yCls = f.return1y >= 0 ? 'price-up' : 'price-down';
-    const tagsHtml = f.tags.map(t => `<span class="fund-tag">${t}</span>`).join('');
-    const rtBadge = f.realtime ? '<span class="fund-rt-badge">实时</span>' : '<span class="fund-rt-badge offline">静态</span>';
-    const gszHtml = f.gsz != null ? `<span class="fund-gsz">估算 <strong>${f.gsz.toFixed(4)}</strong></span><span class="fund-gsz-time">${f.gztime || ''}</span>` : '';
-    html += `<div class="fund-card${f.hot ? ' hot' : ''}">
-      <div class="fund-card-header">
-        <div>
-          <div class="fund-name">${f.name} ${rtBadge}</div>
-          <div class="fund-code">${f.code}</div>
-        </div>
-        <span class="fund-type-badge">${f.type}</span>
-      </div>
-      <div class="fund-nav-row">
-        <span class="fund-nav">${f.nav.toFixed(4)}</span>
-        <span class="fund-nav-label">净值 (${f.navDate})</span>
-        <span class="fund-change ${changeCls}" style="background:${up ? 'var(--color-up-bg)' : 'var(--color-down-bg)'};color:${up ? 'var(--color-up)' : 'var(--color-down)'}">${arrow} ${sign}${f.changePercent.toFixed(2)}%</span>
-      </div>
-      ${gszHtml ? `<div class="fund-gsz-row">${gszHtml}</div>` : ''}
-      <div class="fund-returns">
-        <div class="return-item">
-          <div class="return-label">近1月</div>
-          <div class="return-value ${ret1mCls}">${sign}${f.return1m.toFixed(2)}%</div>
-        </div>
-        <div class="return-item">
-          <div class="return-label">近3月</div>
-          <div class="return-value ${ret3mCls}">${sign}${f.return3m.toFixed(2)}%</div>
-        </div>
-        <div class="return-item">
-          <div class="return-label">近1年</div>
-          <div class="return-value ${ret1yCls}">${sign}${f.return1y.toFixed(2)}%</div>
-        </div>
-      </div>
-      <div class="fund-tags">${tagsHtml}</div>
-      <div class="fund-desc">${f.desc}</div>
-      <div class="fund-meta">
-        <span><span class="meta-label">风险等级</span><span class="meta-value">${f.risk}</span></span>
-        <span><span class="meta-label">基金规模</span><span class="meta-value">${f.scale}</span></span>
-        <span><span class="meta-label">基金经理</span><span class="meta-value">${f.manager}</span></span>
-      </div>
-    </div>`;
-  }
-  fundsGrid.innerHTML = html;
-}
-
-async function fetchFunds(sort) {
-  try {
-    const r = await fetch(`/api/funds?sort=${sort || 'return1y'}`);
-    const j = await r.json();
-    if (j.success) renderFunds(j.data);
-  } catch (e) { console.error('获取基金数据失败:', e); }
 }
 
 // ============== 汇率获取 ==============
@@ -227,8 +178,20 @@ async function fetchPrices() {
   try {
     const r = await fetch('/api/prices');
     const j = await r.json();
-    if (j.success) { state.prices = j.data; renderCards(j.data); renderTable(j.data); setStatus(true); }
-  } catch (e) { console.error('获取价格失败:', e); setStatus(false); }
+    if (j.success) {
+      state.prices = j.data;
+      renderCards(j.data);
+      renderTable(j.data);
+      setStatus(true);
+      setError('');
+    } else {
+      setError(`⚠️ ${j.error || '价格获取失败'}`);
+      setStatus(false);
+    }
+  } catch (e) {
+    setError('⚠️ 连接服务器失败，请检查服务是否运行');
+    setStatus(false);
+  }
 }
 
 // ============== 自动刷新 ==============
@@ -245,13 +208,10 @@ async function init() {
   initChart();
   await fetchPrices();
   await loadHistory(metalSelect.value, parseInt(rangeSelect.value));
-  startAutoRefresh(1);
+  startAutoRefresh(5);
 
   metalSelect.addEventListener('change', () => loadHistory(metalSelect.value, parseInt(rangeSelect.value)));
   rangeSelect.addEventListener('change', () => loadHistory(metalSelect.value, parseInt(rangeSelect.value)));
-
-  await fetchFunds('return1y');
-  fundSortSelect.addEventListener('change', () => fetchFunds(fundSortSelect.value));
 
   setInterval(() => loadHistory(metalSelect.value, parseInt(rangeSelect.value)), 5 * 60 * 1000);
 }

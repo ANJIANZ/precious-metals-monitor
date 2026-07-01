@@ -105,6 +105,25 @@ body {
   letter-spacing: 1px;
 }
 
+/* ============== 错误提示 ============== */
+.error-banner {
+  max-width: 1400px;
+  margin: 16px auto;
+  padding: 12px 20px;
+  background: rgba(255, 23, 68, 0.12);
+  border: 1px solid rgba(255, 23, 68, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--color-down);
+  font-size: 13px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ============== 主容器 ============== */
 .main-container {
   max-width: 1400px;
